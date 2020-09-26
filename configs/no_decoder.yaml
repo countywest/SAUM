@@ -1,0 +1,31 @@
+dataset:
+  type: pcn # pcn / topnet / car
+
+model:
+  encoder_dims: [128, 256, 512, 1024]
+
+  decoder:
+    type: no_decoder # fcae / atlas / pcn / topnet
+
+  upsampling_ratio: 8
+  upsampling_dims: [256, 128, 3]
+
+  use_bn: false
+
+train_setting:
+  num_input_points: 2048
+  batch_size: 32
+  learning_rate:
+    init_lr: 0.0001
+    lr_decay: true
+    lr_decay_steps: 50000
+    lr_decay_rate: 0.7
+    lr_clip: 0.000001
+  max_step: 300000
+  steps_per_print: 1000
+  steps_per_eval: 3000
+
+visualizing:
+  steps_per_visu: 3000
+  visu_freq: 4
+  visu_split: true

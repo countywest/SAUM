@@ -1,0 +1,6 @@
+**/__pycache__/*
+.vscode/
+logs/
+**/results/
+.idea/
+data/
