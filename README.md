@@ -25,6 +25,8 @@ Followings are instructions for preparing TopNet dataset same as our experimenta
   - ```rm -rf train.list test test.list && mv val test && mv val.list test.list```
   - copy ```configs/topnet_dataset/*.list``` to the data directory.
   - make ```val``` directory(```partial, gt```) using ```val.list``` 
+  
+You can also download preprocessed topnet dataset [here](https://drive.google.com/drive/folders/16QFZuNLLX5ClUVlkiU6j2gt30gCcDJLL?usp=sharing).
 
 #### Install Dependencies
 ```pip install -r requirements.txt```
@@ -48,4 +50,4 @@ To evaluate the result in the test set,
 Any hyperparameters can be controlled in the yaml files.
 
 #### Pretrained Models
-The pretrained models on PCN dataset with decoder PCN and TopNet are available.[[here](https://drive.google.com/drive/folders/1rYmo5IWPGHVePAKtwFa6YT3wRReAnQRl?usp=sharing)]
+The pretrained models on PCN dataset with decoder PCN and TopNet are available.[[here](https://drive.google.com/drive/folders/1DMNY7Q3mnkz3UpYptXAH97iT9ysVqQLc?usp=sharing)]
