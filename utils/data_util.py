@@ -7,6 +7,41 @@ import os
 import h5py
 import random
 
+### For all dataset ###
+class Dataset:
+    def __init__(self, data_config, train_config, is_training):
+        self.data_config = data_config
+        self.train_config = train_config
+        self.is_training = is_training
+
+        if data_config['type'] == 'pcn' or data_config['type'] == 'car':
+            target = 'train' if is_training else 'valid'
+            self.df, self.num_data = lmdb_dataflow(
+                data_config['lmdb_' + target], train_config['batch_size'], train_config['num_input_points'],
+                data_config['num_gt_points'], is_training=is_training)
+            self.data_gen = self.df.get_data()
+        elif data_config['type'] == 'topnet':
+            self.loader = DataLoader(data_config['dir'], train_config['batch_size'], is_train=is_training)
+            self.num_data = self.loader.get_num_data()
+            self.get_next = self.loader.get_next()
+        else:
+            raise NotImplementedError
+
+    def get_num_data(self):
+        return self.num_data
+
+    def fetch(self, sess):
+        if self.data_config['type'] == 'pcn' or self.data_config['type'] == 'car':
+            ids, inputs, npts, gt = next(self.data_gen)
+        elif self.data_config['type'] == 'topnet':
+            ids, inputs, npts, gt = sess.run(self.get_next)
+            inputs = np.reshape(inputs, (1, -1, 3))  # for same input format with PCN
+        else:
+            raise NotImplementedError
+
+        return ids, inputs, npts, gt
+
+
 ### For PCN and shapenet_car dataset ###
 def resample_pcd(pcd, n):
     """Drop or duplicate points so that pcd has exactly n points"""

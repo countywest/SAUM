@@ -12,7 +12,7 @@ import tensorflow as tf
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(BASE_DIR)
 sys.path.append(os.path.join(BASE_DIR, 'models'))
-from utils.data_util import lmdb_dataflow, DataLoader
+from utils.data_util import Dataset
 from utils.visu_util import plot_pcd_three_views
 from utils.args import trainArguments
 from termcolor import colored
@@ -29,24 +29,10 @@ def train(config):
     npts_pl = tf.placeholder(tf.int32, (train_config['batch_size'],), 'num_points')
     gt_pl = tf.placeholder(tf.float32, (train_config['batch_size'], data_config['num_gt_points'], 3), 'ground_truths')
 
-    if data_config['type'] == 'pcn' or data_config['type'] == 'car':
-        df_train, num_train = lmdb_dataflow(
-            data_config['lmdb_train'], train_config['batch_size'], train_config['num_input_points'],
-            data_config['num_gt_points'], is_training=True)
-        df_valid, num_valid = lmdb_dataflow(
-            data_config['lmdb_valid'], train_config['batch_size'], train_config['num_input_points'],
-            data_config['num_gt_points'], is_training=False)
-        train_gen = df_train.get_data()
-        valid_gen = df_valid.get_data()
-    elif data_config['type'] == 'topnet':
-        dataset_train = DataLoader(data_config['dir'], train_config['batch_size'], is_train=True)
-        dataset_valid = DataLoader(data_config['dir'], train_config['batch_size'], is_train=False)
-        num_train = dataset_train.get_num_data()
-        num_valid = dataset_valid.get_num_data()
-        train_get_next = dataset_train.get_next()
-        valid_get_next = dataset_valid.get_next()
-    else:
-        raise NotImplementedError
+    train_set = Dataset(data_config, train_config, is_training=True)
+    valid_set = Dataset(data_config, train_config, is_training=False)
+    num_train = train_set.get_num_data()
+    num_valid = valid_set.get_num_data()
 
     # Model
     model_module = importlib.import_module(config['model']['decoder']['type'])
@@ -75,14 +61,7 @@ def train(config):
         sess.run(tf.local_variables_initializer())
 
         for i in range(num_eval_steps):
-            if data_config['type'] == 'pcn' or data_config['type'] == 'car':
-                ids, inputs, npts, gt = next(valid_gen)
-            elif data_config['type'] == 'topnet':
-                ids, inputs, npts, gt = sess.run(valid_get_next)
-                inputs = np.reshape(inputs, (1, -1, 3)) # for same input format with PCN
-            else:
-                raise NotImplementedError
-
+            ids, inputs, npts, gt = valid_set.fetch(sess)
             gt = gt[:, :data_config['num_gt_points'], :]
             feed_dict = {inputs_pl: inputs, npts_pl: npts, gt_pl: gt, is_training_pl: False}
             evaluation_loss = sess.run(model.evaluation_loss, feed_dict=feed_dict)
@@ -122,14 +101,7 @@ def train(config):
     for step in range(init_step + 1, train_config['max_step'] + 1):
         epoch = step * train_config['batch_size'] // num_train + 1
 
-        if data_config['type'] == 'pcn' or data_config['type'] == 'car':
-            ids, inputs, npts, gt = next(train_gen)
-        elif data_config['type'] == 'topnet':
-            ids, inputs, npts, gt = sess.run(train_get_next)
-            inputs = np.reshape(inputs, (1, -1, 3)) # for same input format with PCN
-        else:
-            raise NotImplementedError
-
+        ids, inputs, npts, gt = train_set.fetch(sess)
         gt = gt[:, :data_config['num_gt_points'], :]
         start = time.time()
         feed_dict = {inputs_pl: inputs, npts_pl: npts, gt_pl: gt, is_training_pl: True}
@@ -153,13 +125,7 @@ def train(config):
             sess.run(tf.local_variables_initializer())
             for i in range(num_eval_steps):
                 start = time.time()
-                if data_config['type'] == 'pcn' or data_config['type'] == 'car':
-                    ids, inputs, npts, gt = next(valid_gen)
-                elif data_config['type'] == 'topnet':
-                    ids, inputs, npts, gt = sess.run(valid_get_next)
-                    inputs = np.reshape(inputs, (1, -1, 3))  # for same input format with PCN
-                else:
-                    raise NotImplementedError
+                ids, inputs, npts, gt = valid_set.fetch(sess)
                 gt = gt[:, :data_config['num_gt_points'], :]
                 feed_dict = {inputs_pl: inputs, npts_pl: npts, gt_pl: gt, is_training_pl: False}
                 evaluation_loss, _ = sess.run([model.evaluation_loss, model.update], feed_dict=feed_dict)
@@ -180,20 +146,12 @@ def train(config):
         # visualize
         if step % config['visualizing']['steps_per_visu'] == 0:
             print('visualizing!')
-            if data_config['type'] == 'pcn' or data_config['type'] == 'car':
-                vis_ids, vis_inputs, vis_npts, vis_gt = next(valid_gen)
-            elif data_config['type'] == 'topnet':
-                vis_ids, vis_inputs, vis_npts, vis_gt = sess.run(valid_get_next)
-
+            vis_ids, vis_inputs, vis_npts, vis_gt = valid_set.fetch(sess)
+            if data_config['type'] == 'topnet':
                 # for replace the character "/" to "_"
                 vis_ids = vis_ids.astype('U')
                 vis_ids = np.char.split(vis_ids, sep='/', maxsplit=1)
                 vis_ids = np.char.join(['_'] * train_config['batch_size'], vis_ids)
-
-                # for same input format with PCN
-                vis_inputs = np.reshape(vis_inputs, (1, -1, 3))
-            else:
-                raise NotImplementedError
 
             vis_feed_dict = {inputs_pl:vis_inputs, npts_pl:vis_npts, gt_pl:vis_gt, is_training_pl:False}
             all_pcds = sess.run(model.visualize_ops, feed_dict=vis_feed_dict)
