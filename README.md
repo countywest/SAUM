@@ -1,6 +1,6 @@
 # SAUM
-Tensorflow code for the paper SAUM: Symmetry-Aware Upsampling Module
-for Consistent Point Cloud Completion.
+Tensorflow code for the paper [SAUM: Symmetry-Aware Upsampling Module
+for Consistent Point Cloud Completion.](https://openaccess.thecvf.com/content/ACCV2020/papers/Son_SAUM_Symmetry-Aware_Upsampling_Module_for_Consistent_Point_Cloud_Completion_ACCV_2020_paper.pdf)
 
 **Hyeontae Son, Young Min Kim**
 
