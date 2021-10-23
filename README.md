@@ -7,17 +7,17 @@ for Consistent Point Cloud Completion.](https://openaccess.thecvf.com/content/AC
 ![architecture](./imgs/architecture.JPG)
 
 ## Prerequisites
-#### Clone this repository
+### Clone this repository
 ```git clone https://github.com/countywest/SAUM.git```
 
-#### Download & Link datasets
+### Download & Link datasets
   - [PCN](https://drive.google.com/drive/folders/1P_W1tz5Q4ZLapUifuOE4rFAZp6L1XTJz)
   - [TopNet](http://download.cs.stanford.edu/downloads/completion3d/dataset2019.zip)
   - [KITTI](https://drive.google.com/drive/folders/1fSu0_huWhticAlzLh3Ejpg8zxzqO1z-F)
   - ```mkdir data && ln -s [path to dataset] data/[dataset name]```
     - dataset name: ```pcn, topnet, kitti```
 
-#### Preprocess TopNet dataset (optional)
+### Preprocess TopNet dataset (optional)
 Since TopNet dataset does not provide the ground
 truth for test data, we used the provided validation set for testing and picked 600 samples from the training data to use it as a validation set.
 Followings are instructions for preparing TopNet dataset same as our experimental setting.
@@ -29,10 +29,10 @@ Followings are instructions for preparing TopNet dataset same as our experimenta
 
 You can also download preprocessed topnet dataset [here](https://drive.google.com/drive/folders/16QFZuNLLX5ClUVlkiU6j2gt30gCcDJLL?usp=sharing).
 
-#### Install Dependencies
+### Install Dependencies
 ```pip install -r requirements.txt```
 
-#### Build TensorFlow Extensions
+### Build TensorFlow Extensions
 Please assign appropriate path to the vars (```cuda_inc, cuda_lib, nvcc, tf_inc, tf_inc_pub, tf_lib```)
 in ```fps/tf_sampling_compile.sh``` & ```pc_distance/makefile```
 
@@ -50,7 +50,7 @@ To evaluate the result in the test set,
 
 Any hyperparameters can be controlled in the yaml files.
 
-#### Pretrained Models
+### Pretrained Models
 The pretrained models on PCN dataset with decoder PCN and TopNet are available.[[here](https://drive.google.com/drive/folders/1DMNY7Q3mnkz3UpYptXAH97iT9ysVqQLc?usp=sharing)]
 
 ## Acknowledgements
