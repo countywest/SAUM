@@ -6,6 +6,16 @@ for Consistent Point Cloud Completion.](https://openaccess.thecvf.com/content/AC
 
 ![architecture](./imgs/architecture.JPG)
 
+```bash
+@InProceedings{Son_2020_ACCV,
+    author    = {Son, Hyeontae and Kim, Young Min},
+    title     = {SAUM: Symmetry-Aware Upsampling Module for Consistent Point Cloud Completion},
+    booktitle = {Proceedings of the Asian Conference on Computer Vision (ACCV)},
+    month     = {November},
+    year      = {2020}
+}
+```
+
 ## Prerequisites
 ### Clone this repository
 ```git clone https://github.com/countywest/SAUM.git```
